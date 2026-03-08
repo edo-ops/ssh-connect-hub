@@ -14,6 +14,23 @@ import { toast } from 'sonner';
 
 const Index = () => {
   const [unlocked, setUnlocked] = useState(false);
+  const [autoUnlocking, setAutoUnlocking] = useState(true);
+
+  // Auto-unlock from session
+  useEffect(() => {
+    const savedPassword = getSession();
+    if (savedPassword && hasMasterPassword()) {
+      initializeMasterPassword(savedPassword)
+        .then(key => {
+          setCryptoKey(key);
+          setUnlocked(true);
+        })
+        .catch(() => {})
+        .finally(() => setAutoUnlocking(false));
+    } else {
+      setAutoUnlocking(false);
+    }
+  }, []);
   const [connections, setConnections] = useState<SSHConnection[]>([]);
   const [groups, setGroups] = useState<SSHGroup[]>(getGroups());
   const [showForm, setShowForm] = useState(false);
