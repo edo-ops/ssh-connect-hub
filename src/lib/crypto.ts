@@ -35,8 +35,11 @@ async function deriveKey(password: string): Promise<CryptoKey> {
 export async function encrypt(plaintext: string, key: CryptoKey): Promise<string> {
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(plaintext);
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-  // Combine IV + ciphertext and base64 encode
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: iv as unknown as ArrayBuffer },
+    key,
+    encoded as unknown as ArrayBuffer
+  );
   const combined = new Uint8Array(iv.length + new Uint8Array(ciphertext).length);
   combined.set(iv);
   combined.set(new Uint8Array(ciphertext), iv.length);
