@@ -124,7 +124,6 @@ const Index = () => {
   if (!unlocked) {
     return <MasterPasswordPrompt onUnlock={() => setUnlocked(true)} />;
   }
-  }
 
   return (
     <div className="min-h-screen bg-background relative">
