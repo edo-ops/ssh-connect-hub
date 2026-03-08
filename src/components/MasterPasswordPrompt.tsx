@@ -37,8 +37,8 @@ export function MasterPasswordPrompt({ onUnlock }: Props) {
       const key = await initializeMasterPassword(password);
       setCryptoKey(key);
       onUnlock();
-    } catch {
-      setError('Mot de passe maître incorrect');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Mot de passe maître incorrect');
     } finally {
       setLoading(false);
     }

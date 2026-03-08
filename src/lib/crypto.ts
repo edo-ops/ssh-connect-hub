@@ -20,6 +20,7 @@ function getOrCreateSalt(): Uint8Array {
 }
 
 async function deriveKey(password: string): Promise<CryptoKey> {
+  ensureWebCryptoAvailable();
   const salt = getOrCreateSalt();
   const enc = new TextEncoder().encode(password);
   const keyMaterial = await crypto.subtle.importKey(
