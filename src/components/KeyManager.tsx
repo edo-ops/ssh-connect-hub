@@ -64,7 +64,6 @@ export function KeyManager() {
         </Button>
       </div>
 
-      {/* Aide commandes */}
       <div className="bg-muted rounded-lg p-3 border border-border">
         <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
           <FileText className="w-3 h-3" /> Commandes utiles :
@@ -81,7 +80,6 @@ export function KeyManager() {
         </div>
       </div>
 
-      {/* Liste des clés */}
       <div className="space-y-2">
         {keys.map(key => (
           <div key={key.id} className="border border-border rounded-lg p-3 bg-card group hover:border-glow transition-all">
@@ -111,7 +109,6 @@ export function KeyManager() {
         )}
       </div>
 
-      {/* Formulaire */}
       {showForm && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-lg p-6 w-full max-w-lg border-glow">
