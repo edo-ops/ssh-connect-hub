@@ -56,6 +56,7 @@ export function ConnectionForm({ connection, groups, onSave, onCancel }: Props) 
       privateKey: form.privateKey || undefined,
       tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
       notes: form.notes || undefined,
+      groupId: form.groupId || undefined,
       createdAt: connection?.createdAt || now,
       updatedAt: now,
     });
