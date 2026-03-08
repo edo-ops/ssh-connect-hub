@@ -8,8 +8,17 @@ export interface SSHConnection {
   privateKey?: string;
   tags: string[];
   notes?: string;
+  groupId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SSHGroup {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  createdAt: string;
 }
 
 export interface SSHKey {
@@ -25,6 +34,7 @@ export interface SSHKey {
 
 const CONNECTIONS_KEY = 'ssh-manager-connections';
 const KEYS_KEY = 'ssh-manager-keys';
+const GROUPS_KEY = 'ssh-manager-groups';
 
 export function getConnections(): SSHConnection[] {
   const data = localStorage.getItem(CONNECTIONS_KEY);
@@ -66,4 +76,31 @@ export function saveSSHKey(key: SSHKey): void {
 export function deleteSSHKey(id: string): void {
   const keys = getSSHKeys().filter(k => k.id !== id);
   localStorage.setItem(KEYS_KEY, JSON.stringify(keys));
+}
+
+// Groups
+export function getGroups(): SSHGroup[] {
+  const data = localStorage.getItem(GROUPS_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveGroup(group: SSHGroup): void {
+  const groups = getGroups();
+  const idx = groups.findIndex(g => g.id === group.id);
+  if (idx >= 0) {
+    groups[idx] = group;
+  } else {
+    groups.push(group);
+  }
+  localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+}
+
+export function deleteGroup(id: string): void {
+  const groups = getGroups().filter(g => g.id !== id);
+  localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+  // Remove groupId from connections in this group
+  const connections = getConnections().map(c =>
+    c.groupId === id ? { ...c, groupId: undefined } : c
+  );
+  localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(connections));
 }

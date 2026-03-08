@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
-import { getConnections, saveConnection, deleteConnection, SSHConnection } from '@/lib/ssh-store';
+import { getConnections, saveConnection, deleteConnection, SSHConnection, getGroups, saveGroup, deleteGroup, SSHGroup } from '@/lib/ssh-store';
 import { ConnectionCard } from '@/components/ConnectionCard';
 import { ConnectionForm } from '@/components/ConnectionForm';
+import { GroupManager } from '@/components/GroupManager';
 import { KeyManager } from '@/components/KeyManager';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,27 +11,51 @@ import { toast } from 'sonner';
 
 const Index = () => {
   const [connections, setConnections] = useState<SSHConnection[]>(getConnections());
+  const [groups, setGroups] = useState<SSHGroup[]>(getGroups());
   const [showForm, setShowForm] = useState(false);
   const [editingConnection, setEditingConnection] = useState<SSHConnection | null>(null);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<'connections' | 'keys'>('connections');
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  const refresh = () => setConnections(getConnections());
+  const refreshConnections = () => setConnections(getConnections());
+  const refreshGroups = () => setGroups(getGroups());
+
+  const connectionCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    connections.forEach(c => {
+      if (c.groupId) counts[c.groupId] = (counts[c.groupId] || 0) + 1;
+    });
+    return counts;
+  }, [connections]);
 
   const filtered = useMemo(() => {
-    if (!search) return connections;
-    const q = search.toLowerCase();
-    return connections.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.host.toLowerCase().includes(q) ||
-      c.username.toLowerCase().includes(q) ||
-      c.tags.some(t => t.toLowerCase().includes(q))
-    );
-  }, [connections, search]);
+    let result = connections;
+
+    // Filter by group
+    if (selectedGroupId === 'ungrouped') {
+      result = result.filter(c => !c.groupId);
+    } else if (selectedGroupId) {
+      result = result.filter(c => c.groupId === selectedGroupId);
+    }
+
+    // Filter by search
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(c =>
+        c.name.toLowerCase().includes(q) ||
+        c.host.toLowerCase().includes(q) ||
+        c.username.toLowerCase().includes(q) ||
+        c.tags.some(t => t.toLowerCase().includes(q))
+      );
+    }
+
+    return result;
+  }, [connections, search, selectedGroupId]);
 
   const handleSave = (conn: SSHConnection) => {
     saveConnection(conn);
-    refresh();
+    refreshConnections();
     setShowForm(false);
     setEditingConnection(null);
     toast.success(editingConnection ? 'Connexion mise à jour' : 'Connexion ajoutée');
@@ -38,7 +63,7 @@ const Index = () => {
 
   const handleDelete = (id: string) => {
     deleteConnection(id);
-    refresh();
+    refreshConnections();
     toast.success('Connexion supprimée');
   };
 
@@ -47,13 +72,27 @@ const Index = () => {
     setShowForm(true);
   };
 
+  const handleSaveGroup = (group: SSHGroup) => {
+    saveGroup(group);
+    refreshGroups();
+    toast.success('Groupe enregistré');
+  };
+
+  const handleDeleteGroup = (id: string) => {
+    deleteGroup(id);
+    refreshGroups();
+    refreshConnections();
+    if (selectedGroupId === id) setSelectedGroupId(null);
+    toast.success('Groupe supprimé');
+  };
+
   return (
     <div className="min-h-screen bg-background relative">
       <div className="scanline" />
 
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container max-w-5xl mx-auto px-4 py-4">
+        <div className="container max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-primary/10 terminal-glow">
@@ -76,7 +115,7 @@ const Index = () => {
       </header>
 
       {/* Main */}
-      <main className="container max-w-5xl mx-auto px-4 py-6">
+      <main className="container max-w-6xl mx-auto px-4 py-6">
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-muted p-1 rounded-lg w-fit">
           <button
@@ -102,39 +141,55 @@ const Index = () => {
         </div>
 
         {activeTab === 'connections' && (
-          <>
-            {/* Search */}
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Rechercher par nom, IP, utilisateur ou tag..."
-                className="pl-10 bg-muted border-border font-mono text-sm"
+          <div className="flex gap-6">
+            {/* Sidebar - Groups */}
+            <aside className="w-52 flex-shrink-0">
+              <GroupManager
+                groups={groups}
+                selectedGroupId={selectedGroupId}
+                onSelectGroup={setSelectedGroupId}
+                onSaveGroup={handleSaveGroup}
+                onDeleteGroup={handleDeleteGroup}
+                connectionCounts={connectionCounts}
+                totalConnections={connections.length}
               />
-            </div>
+            </aside>
 
-            {/* Grid */}
-            <div className="grid gap-3 sm:grid-cols-2">
-              {filtered.map(conn => (
-                <ConnectionCard key={conn.id} connection={conn} onEdit={handleEdit} onDelete={handleDelete} />
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
-              <div className="text-center py-20">
-                <Terminal className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-                <p className="text-muted-foreground font-mono text-sm">
-                  {search ? 'Aucun résultat trouvé' : 'Aucune connexion enregistrée'}
-                </p>
-                {!search && (
-                  <Button variant="outline" onClick={() => setShowForm(true)} className="mt-4 font-mono text-sm">
-                    <Plus className="w-4 h-4 mr-1" /> Ajouter une connexion
-                  </Button>
-                )}
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {/* Search */}
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Rechercher par nom, IP, utilisateur ou tag..."
+                  className="pl-10 bg-muted border-border font-mono text-sm"
+                />
               </div>
-            )}
-          </>
+
+              {/* Grid */}
+              <div className="grid gap-3 sm:grid-cols-2">
+                {filtered.map(conn => (
+                  <ConnectionCard key={conn.id} connection={conn} onEdit={handleEdit} onDelete={handleDelete} />
+                ))}
+              </div>
+
+              {filtered.length === 0 && (
+                <div className="text-center py-20">
+                  <Terminal className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-muted-foreground font-mono text-sm">
+                    {search ? 'Aucun résultat trouvé' : 'Aucune connexion enregistrée'}
+                  </p>
+                  {!search && (
+                    <Button variant="outline" onClick={() => setShowForm(true)} className="mt-4 font-mono text-sm">
+                      <Plus className="w-4 h-4 mr-1" /> Ajouter une connexion
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         {activeTab === 'keys' && <KeyManager />}
@@ -144,6 +199,7 @@ const Index = () => {
       {showForm && (
         <ConnectionForm
           connection={editingConnection}
+          groups={groups}
           onSave={handleSave}
           onCancel={() => { setShowForm(false); setEditingConnection(null); }}
         />

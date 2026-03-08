@@ -1,18 +1,20 @@
 import { useState, useEffect } from 'react';
-import { SSHConnection } from '@/lib/ssh-store';
+import { SSHConnection, SSHGroup } from '@/lib/ssh-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
 
 interface Props {
   connection?: SSHConnection | null;
+  groups: SSHGroup[];
   onSave: (conn: SSHConnection) => void;
   onCancel: () => void;
 }
 
-export function ConnectionForm({ connection, onSave, onCancel }: Props) {
+export function ConnectionForm({ connection, groups, onSave, onCancel }: Props) {
   const [form, setForm] = useState({
     name: '',
     host: '',
@@ -22,6 +24,7 @@ export function ConnectionForm({ connection, onSave, onCancel }: Props) {
     privateKey: '',
     tags: '',
     notes: '',
+    groupId: '',
   });
 
   useEffect(() => {
@@ -35,6 +38,7 @@ export function ConnectionForm({ connection, onSave, onCancel }: Props) {
         privateKey: connection.privateKey || '',
         tags: connection.tags.join(', '),
         notes: connection.notes || '',
+        groupId: connection.groupId || '',
       });
     }
   }, [connection]);
@@ -52,6 +56,7 @@ export function ConnectionForm({ connection, onSave, onCancel }: Props) {
       privateKey: form.privateKey || undefined,
       tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
       notes: form.notes || undefined,
+      groupId: form.groupId || undefined,
       createdAt: connection?.createdAt || now,
       updatedAt: now,
     });
@@ -104,9 +109,30 @@ export function ConnectionForm({ connection, onSave, onCancel }: Props) {
             <Textarea value={form.privateKey} onChange={e => update('privateKey', e.target.value)} placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" rows={3} className="bg-muted border-border font-mono text-xs" />
           </div>
 
-          <div>
-            <Label className="text-xs text-muted-foreground">Tags (séparés par des virgules)</Label>
-            <Input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="production, web, docker" className="bg-muted border-border font-mono text-sm" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs text-muted-foreground">Tags (séparés par des virgules)</Label>
+              <Input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="production, web, docker" className="bg-muted border-border font-mono text-sm" />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Groupe</Label>
+              <Select value={form.groupId} onValueChange={v => update('groupId', v === 'none' ? '' : v)}>
+                <SelectTrigger className="bg-muted border-border font-mono text-sm">
+                  <SelectValue placeholder="Sans groupe" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sans groupe</SelectItem>
+                  {groups.map(g => (
+                    <SelectItem key={g.id} value={g.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: g.color || 'hsl(140 100% 50%)' }} />
+                        {g.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>
