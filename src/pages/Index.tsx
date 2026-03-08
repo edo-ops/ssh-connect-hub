@@ -1,16 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getConnections, saveConnection, deleteConnection, SSHConnection, getGroups, saveGroup, deleteGroup, SSHGroup } from '@/lib/ssh-store';
 import { ConnectionCard } from '@/components/ConnectionCard';
 import { ConnectionForm } from '@/components/ConnectionForm';
 import { GroupManager } from '@/components/GroupManager';
 import { KeyManager } from '@/components/KeyManager';
+import { MasterPasswordPrompt } from '@/components/MasterPasswordPrompt';
+import { hasMasterPassword } from '@/lib/crypto';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Terminal, Key, Server } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const [connections, setConnections] = useState<SSHConnection[]>(getConnections());
+  const [unlocked, setUnlocked] = useState(false);
+  const [connections, setConnections] = useState<SSHConnection[]>([]);
   const [groups, setGroups] = useState<SSHGroup[]>(getGroups());
   const [showForm, setShowForm] = useState(false);
   const [editingConnection, setEditingConnection] = useState<SSHConnection | null>(null);
@@ -18,8 +21,12 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<'connections' | 'keys'>('connections');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
 
-  const refreshConnections = () => setConnections(getConnections());
+  const refreshConnections = async () => setConnections(await getConnections());
   const refreshGroups = () => setGroups(getGroups());
+
+  useEffect(() => {
+    if (unlocked) { refreshConnections(); }
+  }, [unlocked]);
 
   const connectionCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -31,15 +38,11 @@ const Index = () => {
 
   const filtered = useMemo(() => {
     let result = connections;
-
-    // Filter by group
     if (selectedGroupId === 'ungrouped') {
       result = result.filter(c => !c.groupId);
     } else if (selectedGroupId) {
       result = result.filter(c => c.groupId === selectedGroupId);
     }
-
-    // Filter by search
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(c =>
@@ -49,21 +52,20 @@ const Index = () => {
         c.tags.some(t => t.toLowerCase().includes(q))
       );
     }
-
     return result;
   }, [connections, search, selectedGroupId]);
 
-  const handleSave = (conn: SSHConnection) => {
-    saveConnection(conn);
-    refreshConnections();
+  const handleSave = async (conn: SSHConnection) => {
+    await saveConnection(conn);
+    await refreshConnections();
     setShowForm(false);
     setEditingConnection(null);
     toast.success(editingConnection ? 'Connexion mise à jour' : 'Connexion ajoutée');
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     deleteConnection(id);
-    refreshConnections();
+    await refreshConnections();
     toast.success('Connexion supprimée');
   };
 
@@ -78,13 +80,17 @@ const Index = () => {
     toast.success('Groupe enregistré');
   };
 
-  const handleDeleteGroup = (id: string) => {
+  const handleDeleteGroup = async (id: string) => {
     deleteGroup(id);
     refreshGroups();
-    refreshConnections();
+    await refreshConnections();
     if (selectedGroupId === id) setSelectedGroupId(null);
     toast.success('Groupe supprimé');
   };
+
+  if (!unlocked) {
+    return <MasterPasswordPrompt onUnlock={() => setUnlocked(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -142,7 +148,6 @@ const Index = () => {
 
         {activeTab === 'connections' && (
           <div className="flex gap-6">
-            {/* Sidebar - Groups */}
             <aside className="w-52 flex-shrink-0">
               <GroupManager
                 groups={groups}
@@ -155,9 +160,7 @@ const Index = () => {
               />
             </aside>
 
-            {/* Content */}
             <div className="flex-1 min-w-0">
-              {/* Search */}
               <div className="relative mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -168,7 +171,6 @@ const Index = () => {
                 />
               </div>
 
-              {/* Grid */}
               <div className="grid gap-3 sm:grid-cols-2">
                 {filtered.map(conn => (
                   <ConnectionCard key={conn.id} connection={conn} onEdit={handleEdit} onDelete={handleDelete} />
@@ -195,7 +197,6 @@ const Index = () => {
         {activeTab === 'keys' && <KeyManager />}
       </main>
 
-      {/* Form Modal */}
       {showForm && (
         <ConnectionForm
           connection={editingConnection}
