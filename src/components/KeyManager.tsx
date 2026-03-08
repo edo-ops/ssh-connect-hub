@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SSHKey, getSSHKeys, saveSSHKey, deleteSSHKey } from '@/lib/ssh-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,15 +8,17 @@ import { Key, Trash2, Copy, Plus, X, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function KeyManager() {
-  const [keys, setKeys] = useState<SSHKey[]>(getSSHKeys());
+  const [keys, setKeys] = useState<SSHKey[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', publicKey: '', privateKey: '', passphrase: '', type: 'ed25519' as SSHKey['type'] });
 
-  const refresh = () => setKeys(getSSHKeys());
+  const refresh = async () => setKeys(await getSSHKeys());
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => { refresh(); }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveSSHKey({
+    await saveSSHKey({
       id: crypto.randomUUID(),
       name: form.name,
       publicKey: form.publicKey,
@@ -25,15 +27,15 @@ export function KeyManager() {
       type: form.type,
       createdAt: new Date().toISOString(),
     });
-    refresh();
+    await refresh();
     setShowForm(false);
     setForm({ name: '', publicKey: '', privateKey: '', passphrase: '', type: 'ed25519' });
     toast.success('Clé SSH enregistrée');
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     deleteSSHKey(id);
-    refresh();
+    await refresh();
     toast.success('Clé supprimée');
   };
 
