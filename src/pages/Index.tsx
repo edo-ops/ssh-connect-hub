@@ -88,6 +88,14 @@ const Index = () => {
     toast.success('Groupe supprimé');
   };
 
+  const handleMoveConnection = async (connectionId: string, groupId: string | undefined) => {
+    const conn = connections.find(c => c.id === connectionId);
+    if (!conn) return;
+    await saveConnection({ ...conn, groupId, updatedAt: new Date().toISOString() });
+    await refreshConnections();
+    toast.success(`Connexion déplacée`);
+  };
+
   if (!unlocked) {
     return <MasterPasswordPrompt onUnlock={() => setUnlocked(true)} />;
   }
