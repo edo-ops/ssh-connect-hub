@@ -53,10 +53,6 @@ export function GroupManager({
     onDragLeave: () => setDragOverId(null),
     onDrop: (e: React.DragEvent) => handleDrop(e, id === 'ungrouped' ? undefined : id),
   });
-  const [isAdding, setIsAdding] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [newName, setNewName] = useState('');
-  const [selectedColor, setSelectedColor] = useState(GROUP_COLORS[0]);
 
   const handleAdd = () => {
     if (!newName.trim()) return;
