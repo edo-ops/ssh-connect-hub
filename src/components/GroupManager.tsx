@@ -31,9 +31,28 @@ export function GroupManager({
   onSelectGroup,
   onSaveGroup,
   onDeleteGroup,
+  onMoveConnection,
   connectionCounts,
   totalConnections,
 }: Props) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [newName, setNewName] = useState('');
+  const [selectedColor, setSelectedColor] = useState(GROUP_COLORS[0]);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  const handleDrop = (e: React.DragEvent, groupId: string | undefined) => {
+    e.preventDefault();
+    setDragOverId(null);
+    const connectionId = e.dataTransfer.getData('connectionId');
+    if (connectionId) onMoveConnection(connectionId, groupId);
+  };
+
+  const dropProps = (id: string) => ({
+    onDragOver: (e: React.DragEvent) => { e.preventDefault(); setDragOverId(id); },
+    onDragLeave: () => setDragOverId(null),
+    onDrop: (e: React.DragEvent) => handleDrop(e, id === 'ungrouped' ? undefined : id),
+  });
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
