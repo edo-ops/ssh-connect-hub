@@ -163,6 +163,7 @@ const Index = () => {
                 onSelectGroup={setSelectedGroupId}
                 onSaveGroup={handleSaveGroup}
                 onDeleteGroup={handleDeleteGroup}
+                onMoveConnection={handleMoveConnection}
                 connectionCounts={connectionCounts}
                 totalConnections={connections.length}
               />
