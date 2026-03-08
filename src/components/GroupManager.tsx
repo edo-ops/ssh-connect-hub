@@ -20,6 +20,7 @@ interface Props {
   onSelectGroup: (id: string | null) => void;
   onSaveGroup: (group: SSHGroup) => void;
   onDeleteGroup: (id: string) => void;
+  onMoveConnection: (connectionId: string, groupId: string | undefined) => void;
   connectionCounts: Record<string, number>;
   totalConnections: number;
 }
