@@ -50,7 +50,11 @@ export async function decrypt(data: string, key: CryptoKey): Promise<string> {
   const combined = Uint8Array.from(atob(data), c => c.charCodeAt(0));
   const iv = combined.slice(0, 12);
   const ciphertext = combined.slice(12);
-  const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  const decrypted = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: iv as unknown as ArrayBuffer },
+    key,
+    ciphertext as unknown as ArrayBuffer
+  );
   return new TextDecoder().decode(decrypted);
 }
 
