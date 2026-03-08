@@ -38,6 +38,7 @@ export function ConnectionForm({ connection, groups, onSave, onCancel }: Props) 
         privateKey: connection.privateKey || '',
         tags: connection.tags.join(', '),
         notes: connection.notes || '',
+        groupId: connection.groupId || '',
       });
     }
   }, [connection]);
