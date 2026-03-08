@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { SSHConnection } from '@/lib/ssh-store';
-import { Server, Copy, Pencil, Trash2, Terminal } from 'lucide-react';
+import { Server, Copy, Pencil, Trash2, Terminal, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Props {
   connection: SSHConnection;
@@ -36,9 +38,30 @@ export function ConnectionCard({ connection, onEdit, onDelete }: Props) {
           <button onClick={() => onEdit(connection)} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-accent transition-colors" title="Modifier">
             <Pencil className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => onDelete(connection.id)} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors" title="Supprimer">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors" title="Supprimer">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-card border-border border-glow">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="font-display text-foreground flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
+                  Supprimer la connexion
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-muted-foreground font-mono text-sm">
+                  Voulez-vous vraiment supprimer <span className="text-foreground font-semibold">{connection.name}</span> ({connection.host}) ? Cette action est irréversible.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="font-mono text-sm">Annuler</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(connection.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90 font-mono text-sm">
+                  Supprimer
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
