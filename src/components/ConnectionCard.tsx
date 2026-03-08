@@ -51,7 +51,7 @@ export function ConnectionCard({ connection, onEdit, onDelete }: Props) {
             </p>
           </div>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1">
           <button onClick={openTerminal} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-primary transition-colors" title="Ouvrir le terminal SSH">
             <Play className="w-3.5 h-3.5" />
           </button>
