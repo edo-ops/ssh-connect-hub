@@ -60,10 +60,9 @@ const Terminal = () => {
     term.writeln('\x1b[1;32m╚══════════════════════════════════════╝\x1b[0m');
     term.writeln('');
 
-    // Determine WebSocket URL — same host as the page, port 3022
+    // WebSocket via Nginx reverse proxy at /ws
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = window.location.hostname;
-    const wsUrl = `${wsProtocol}//${wsHost}:3022`;
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
 
     try {
       const ws = new WebSocket(wsUrl);
