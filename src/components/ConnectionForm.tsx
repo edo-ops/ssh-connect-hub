@@ -109,14 +109,30 @@ export function ConnectionForm({ connection, groups, onSave, onCancel }: Props) 
             <Textarea value={form.privateKey} onChange={e => update('privateKey', e.target.value)} placeholder="-----BEGIN OPENSSH PRIVATE KEY-----" rows={3} className="bg-muted border-border font-mono text-xs" />
           </div>
 
-          <div>
-            <Label className="text-xs text-muted-foreground">Tags (séparés par des virgules)</Label>
-            <Input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="production, web, docker" className="bg-muted border-border font-mono text-sm" />
-          </div>
-
-          <div>
-            <Label className="text-xs text-muted-foreground">Notes</Label>
-            <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Serveur de production..." rows={2} className="bg-muted border-border font-mono text-sm" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-xs text-muted-foreground">Tags (séparés par des virgules)</Label>
+              <Input value={form.tags} onChange={e => update('tags', e.target.value)} placeholder="production, web, docker" className="bg-muted border-border font-mono text-sm" />
+            </div>
+            <div>
+              <Label className="text-xs text-muted-foreground">Groupe</Label>
+              <Select value={form.groupId} onValueChange={v => update('groupId', v === 'none' ? '' : v)}>
+                <SelectTrigger className="bg-muted border-border font-mono text-sm">
+                  <SelectValue placeholder="Sans groupe" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Sans groupe</SelectItem>
+                  {groups.map(g => (
+                    <SelectItem key={g.id} value={g.id}>
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: g.color || 'hsl(140 100% 50%)' }} />
+                        {g.name}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex gap-3 pt-2">
