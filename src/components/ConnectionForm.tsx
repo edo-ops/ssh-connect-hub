@@ -14,7 +14,7 @@ interface Props {
   onCancel: () => void;
 }
 
-export function ConnectionForm({ connection, onSave, onCancel }: Props) {
+export function ConnectionForm({ connection, groups, onSave, onCancel }: Props) {
   const [form, setForm] = useState({
     name: '',
     host: '',
@@ -24,6 +24,7 @@ export function ConnectionForm({ connection, onSave, onCancel }: Props) {
     privateKey: '',
     tags: '',
     notes: '',
+    groupId: '',
   });
 
   useEffect(() => {
