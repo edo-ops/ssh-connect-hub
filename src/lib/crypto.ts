@@ -4,6 +4,32 @@
 const SALT_KEY = 'ssh-manager-salt';
 const VERIFY_KEY = 'ssh-manager-verify';
 const VERIFY_PLAINTEXT = 'ssh-manager-ok';
+const SESSION_KEY = 'ssh-manager-session';
+
+// Session persistence: store password in sessionStorage (XOR-obfuscated)
+function obfuscate(text: string): string {
+  const key = 0xAA;
+  return btoa(Array.from(text).map(c => String.fromCharCode(c.charCodeAt(0) ^ key)).join(''));
+}
+
+function deobfuscate(data: string): string {
+  const key = 0xAA;
+  return Array.from(atob(data)).map(c => String.fromCharCode(c.charCodeAt(0) ^ key)).join('');
+}
+
+export function saveSession(password: string): void {
+  sessionStorage.setItem(SESSION_KEY, obfuscate(password));
+}
+
+export function getSession(): string | null {
+  const data = sessionStorage.getItem(SESSION_KEY);
+  if (!data) return null;
+  try { return deobfuscate(data); } catch { return null; }
+}
+
+export function clearSession(): void {
+  sessionStorage.removeItem(SESSION_KEY);
+}
 
 function ensureWebCryptoAvailable() {
   if (!window.isSecureContext || !crypto?.subtle) {

@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { getConnections, saveConnection, deleteConnection, SSHConnection, getGroups, saveGroup, deleteGroup, SSHGroup } from '@/lib/ssh-store';
+import { getConnections, saveConnection, deleteConnection, SSHConnection, getGroups, saveGroup, deleteGroup, SSHGroup, setCryptoKey } from '@/lib/ssh-store';
 import { ConnectionCard } from '@/components/ConnectionCard';
 import { ConnectionForm } from '@/components/ConnectionForm';
 import { GroupManager } from '@/components/GroupManager';
 import { KeyManager } from '@/components/KeyManager';
 import { MasterPasswordPrompt } from '@/components/MasterPasswordPrompt';
-import { hasMasterPassword } from '@/lib/crypto';
+import { hasMasterPassword, getSession, initializeMasterPassword } from '@/lib/crypto';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Terminal, Key, Server } from 'lucide-react';
@@ -13,6 +13,23 @@ import { toast } from 'sonner';
 
 const Index = () => {
   const [unlocked, setUnlocked] = useState(false);
+  const [autoUnlocking, setAutoUnlocking] = useState(true);
+
+  // Auto-unlock from session
+  useEffect(() => {
+    const savedPassword = getSession();
+    if (savedPassword && hasMasterPassword()) {
+      initializeMasterPassword(savedPassword)
+        .then(key => {
+          setCryptoKey(key);
+          setUnlocked(true);
+        })
+        .catch(() => {})
+        .finally(() => setAutoUnlocking(false));
+    } else {
+      setAutoUnlocking(false);
+    }
+  }, []);
   const [connections, setConnections] = useState<SSHConnection[]>([]);
   const [groups, setGroups] = useState<SSHGroup[]>(getGroups());
   const [showForm, setShowForm] = useState(false);
@@ -95,6 +112,14 @@ const Index = () => {
     await refreshConnections();
     toast.success(`Connexion déplacée`);
   };
+
+  if (autoUnlocking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground font-mono text-sm animate-pulse">Déverrouillage...</p>
+      </div>
+    );
+  }
 
   if (!unlocked) {
     return <MasterPasswordPrompt onUnlock={() => setUnlocked(true)} />;

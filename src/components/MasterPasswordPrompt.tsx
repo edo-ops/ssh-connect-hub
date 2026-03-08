@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { initializeMasterPassword, hasMasterPassword } from '@/lib/crypto';
+import { initializeMasterPassword, hasMasterPassword, saveSession } from '@/lib/crypto';
 import { setCryptoKey } from '@/lib/ssh-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +36,7 @@ export function MasterPasswordPrompt({ onUnlock }: Props) {
     try {
       const key = await initializeMasterPassword(password);
       setCryptoKey(key);
+      saveSession(password);
       onUnlock();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Mot de passe maître incorrect');
