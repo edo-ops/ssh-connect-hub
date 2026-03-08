@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { SSHConnection } from '@/lib/ssh-store';
-import { Server, Copy, Pencil, Trash2, Terminal, AlertTriangle } from 'lucide-react';
+import { Server, Copy, Pencil, Trash2, Terminal, AlertTriangle, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
