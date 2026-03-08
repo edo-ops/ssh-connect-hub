@@ -169,11 +169,14 @@ export function GroupManager({
       {/* Ungrouped */}
       {groups.length > 0 && (
         <button
+          {...dropProps('ungrouped')}
           onClick={() => onSelectGroup('ungrouped')}
           className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
-            selectedGroupId === 'ungrouped'
-              ? 'bg-muted text-primary terminal-glow border border-border'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            dragOverId === 'ungrouped'
+              ? 'bg-primary/20 text-primary border border-primary/50 terminal-glow'
+              : selectedGroupId === 'ungrouped'
+                ? 'bg-muted text-primary terminal-glow border border-border'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
