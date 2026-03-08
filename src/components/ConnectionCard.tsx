@@ -17,6 +17,17 @@ export function ConnectionCard({ connection, onEdit, onDelete }: Props) {
     toast.success('Commande SSH copiée !');
   };
 
+  const openTerminal = () => {
+    const params = new URLSearchParams({
+      host: connection.host,
+      port: String(connection.port),
+      username: connection.username,
+      name: connection.name,
+      ...(connection.password && connection.password !== '••••••••' ? { password: connection.password } : {}),
+    });
+    window.open(`/terminal?${params.toString()}`, '_blank');
+  };
+
   return (
     <div
       draggable
