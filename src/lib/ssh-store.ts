@@ -8,8 +8,17 @@ export interface SSHConnection {
   privateKey?: string;
   tags: string[];
   notes?: string;
+  groupId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SSHGroup {
+  id: string;
+  name: string;
+  icon?: string;
+  color?: string;
+  createdAt: string;
 }
 
 export interface SSHKey {
@@ -25,6 +34,7 @@ export interface SSHKey {
 
 const CONNECTIONS_KEY = 'ssh-manager-connections';
 const KEYS_KEY = 'ssh-manager-keys';
+const GROUPS_KEY = 'ssh-manager-groups';
 
 export function getConnections(): SSHConnection[] {
   const data = localStorage.getItem(CONNECTIONS_KEY);
