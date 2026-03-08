@@ -105,11 +105,28 @@ export function MasterPasswordPrompt({ onUnlock }: Props) {
             {loading ? 'Déchiffrement...' : isFirstTime ? 'Créer le coffre-fort' : 'Déverrouiller'}
           </Button>
 
-          {isFirstTime && (
+          {isFirstTime ? (
             <p className="text-[10px] text-muted-foreground text-center font-mono">
               Ce mot de passe chiffrera vos identifiants avec AES-256-GCM.
               <br />Il ne peut pas être récupéré en cas d'oubli.
             </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('⚠️ Cela supprimera TOUTES vos connexions et clés enregistrées. Continuer ?')) {
+                  localStorage.removeItem('ssh-manager-verify');
+                  localStorage.removeItem('ssh-manager-salt');
+                  localStorage.removeItem('ssh-manager-connections');
+                  localStorage.removeItem('ssh-manager-keys');
+                  localStorage.removeItem('ssh-manager-groups');
+                  window.location.reload();
+                }
+              }}
+              className="text-[10px] text-muted-foreground hover:text-destructive text-center font-mono underline transition-colors w-full"
+            >
+              Mot de passe oublié ? Réinitialiser le coffre-fort
+            </button>
           )}
         </form>
       </div>
