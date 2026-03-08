@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { SSHConnection } from '@/lib/ssh-store';
-import { Server, Copy, Pencil, Trash2, Terminal, AlertTriangle } from 'lucide-react';
+import { Server, Copy, Pencil, Trash2, Terminal, AlertTriangle, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -15,6 +15,17 @@ export function ConnectionCard({ connection, onEdit, onDelete }: Props) {
     const cmd = `ssh ${connection.username}@${connection.host}${connection.port !== 22 ? ` -p ${connection.port}` : ''}`;
     navigator.clipboard.writeText(cmd);
     toast.success('Commande SSH copiée !');
+  };
+
+  const openTerminal = () => {
+    const params = new URLSearchParams({
+      host: connection.host,
+      port: String(connection.port),
+      username: connection.username,
+      name: connection.name,
+      ...(connection.password && connection.password !== '••••••••' ? { password: connection.password } : {}),
+    });
+    window.open(`/terminal?${params.toString()}`, '_blank');
   };
 
   return (
@@ -41,6 +52,9 @@ export function ConnectionCard({ connection, onEdit, onDelete }: Props) {
           </div>
         </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={openTerminal} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-primary transition-colors" title="Ouvrir le terminal SSH">
+            <Play className="w-3.5 h-3.5" />
+          </button>
           <button onClick={copySSHCommand} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-primary transition-colors" title="Copier la commande SSH">
             <Terminal className="w-3.5 h-3.5" />
           </button>
