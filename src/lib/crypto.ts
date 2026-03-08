@@ -15,15 +15,16 @@ function getOrCreateSalt(): Uint8Array {
 
 async function deriveKey(password: string): Promise<CryptoKey> {
   const salt = getOrCreateSalt();
+  const enc = new TextEncoder().encode(password);
   const keyMaterial = await crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(password),
+    enc as unknown as ArrayBuffer,
     'PBKDF2',
     false,
     ['deriveKey']
   );
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt: salt as unknown as ArrayBuffer, iterations: 100_000, hash: 'SHA-256' },
     keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
