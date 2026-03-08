@@ -77,3 +77,30 @@ export function deleteSSHKey(id: string): void {
   const keys = getSSHKeys().filter(k => k.id !== id);
   localStorage.setItem(KEYS_KEY, JSON.stringify(keys));
 }
+
+// Groups
+export function getGroups(): SSHGroup[] {
+  const data = localStorage.getItem(GROUPS_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export function saveGroup(group: SSHGroup): void {
+  const groups = getGroups();
+  const idx = groups.findIndex(g => g.id === group.id);
+  if (idx >= 0) {
+    groups[idx] = group;
+  } else {
+    groups.push(group);
+  }
+  localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+}
+
+export function deleteGroup(id: string): void {
+  const groups = getGroups().filter(g => g.id !== id);
+  localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
+  // Remove groupId from connections in this group
+  const connections = getConnections().map(c =>
+    c.groupId === id ? { ...c, groupId: undefined } : c
+  );
+  localStorage.setItem(CONNECTIONS_KEY, JSON.stringify(connections));
+}
