@@ -20,6 +20,7 @@ interface Props {
   onSelectGroup: (id: string | null) => void;
   onSaveGroup: (group: SSHGroup) => void;
   onDeleteGroup: (id: string) => void;
+  onMoveConnection: (connectionId: string, groupId: string | undefined) => void;
   connectionCounts: Record<string, number>;
   totalConnections: number;
 }
@@ -30,6 +31,7 @@ export function GroupManager({
   onSelectGroup,
   onSaveGroup,
   onDeleteGroup,
+  onMoveConnection,
   connectionCounts,
   totalConnections,
 }: Props) {
@@ -37,6 +39,20 @@ export function GroupManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [selectedColor, setSelectedColor] = useState(GROUP_COLORS[0]);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  const handleDrop = (e: React.DragEvent, groupId: string | undefined) => {
+    e.preventDefault();
+    setDragOverId(null);
+    const connectionId = e.dataTransfer.getData('connectionId');
+    if (connectionId) onMoveConnection(connectionId, groupId);
+  };
+
+  const dropProps = (id: string) => ({
+    onDragOver: (e: React.DragEvent) => { e.preventDefault(); setDragOverId(id); },
+    onDragLeave: () => setDragOverId(null),
+    onDrop: (e: React.DragEvent) => handleDrop(e, id === 'ungrouped' ? undefined : id),
+  });
 
   const handleAdd = () => {
     if (!newName.trim()) return;
@@ -122,11 +138,14 @@ export function GroupManager({
             </div>
           ) : (
             <button
+              {...dropProps(group.id)}
               onClick={() => onSelectGroup(group.id)}
               className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
-                selectedGroupId === group.id
-                  ? 'bg-muted text-primary terminal-glow border border-border'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                dragOverId === group.id
+                  ? 'bg-primary/20 text-primary border border-primary/50 terminal-glow'
+                  : selectedGroupId === group.id
+                    ? 'bg-muted text-primary terminal-glow border border-border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
             >
               <div className="flex items-center gap-2 min-w-0">
@@ -150,11 +169,14 @@ export function GroupManager({
       {/* Ungrouped */}
       {groups.length > 0 && (
         <button
+          {...dropProps('ungrouped')}
           onClick={() => onSelectGroup('ungrouped')}
           className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
-            selectedGroupId === 'ungrouped'
-              ? 'bg-muted text-primary terminal-glow border border-border'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            dragOverId === 'ungrouped'
+              ? 'bg-primary/20 text-primary border border-primary/50 terminal-glow'
+              : selectedGroupId === 'ungrouped'
+                ? 'bg-muted text-primary terminal-glow border border-border'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
         >
           <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />

@@ -18,7 +18,16 @@ export function ConnectionCard({ connection, onEdit, onDelete }: Props) {
   };
 
   return (
-    <div className="group border border-border rounded-lg p-4 bg-card hover:border-glow transition-all duration-300">
+    <div
+      draggable
+      onDragStart={e => {
+        e.dataTransfer.setData('connectionId', connection.id);
+        e.dataTransfer.effectAllowed = 'move';
+        (e.target as HTMLElement).style.opacity = '0.5';
+      }}
+      onDragEnd={e => { (e.target as HTMLElement).style.opacity = '1'; }}
+      className="group border border-border rounded-lg p-4 bg-card hover:border-glow transition-all duration-300 cursor-grab active:cursor-grabbing"
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-md bg-muted">
