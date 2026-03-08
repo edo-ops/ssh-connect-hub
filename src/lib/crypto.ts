@@ -5,6 +5,12 @@ const SALT_KEY = 'ssh-manager-salt';
 const VERIFY_KEY = 'ssh-manager-verify';
 const VERIFY_PLAINTEXT = 'ssh-manager-ok';
 
+function ensureWebCryptoAvailable() {
+  if (!window.isSecureContext || !crypto?.subtle) {
+    throw new Error('Chiffrement indisponible sur cette URL. Utilisez HTTPS (ou localhost/127.0.0.1).');
+  }
+}
+
 function getOrCreateSalt(): Uint8Array {
   const stored = localStorage.getItem(SALT_KEY);
   if (stored) return Uint8Array.from(atob(stored), c => c.charCodeAt(0));
@@ -14,6 +20,7 @@ function getOrCreateSalt(): Uint8Array {
 }
 
 async function deriveKey(password: string): Promise<CryptoKey> {
+  ensureWebCryptoAvailable();
   const salt = getOrCreateSalt();
   const enc = new TextEncoder().encode(password);
   const keyMaterial = await crypto.subtle.importKey(
