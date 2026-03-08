@@ -113,8 +113,17 @@ const Index = () => {
     toast.success(`Connexion déplacée`);
   };
 
+  if (autoUnlocking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground font-mono text-sm animate-pulse">Déverrouillage...</p>
+      </div>
+    );
+  }
+
   if (!unlocked) {
     return <MasterPasswordPrompt onUnlock={() => setUnlocked(true)} />;
+  }
   }
 
   return (
