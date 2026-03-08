@@ -135,6 +135,11 @@ export function ConnectionForm({ connection, groups, onSave, onCancel }: Props) 
             </div>
           </div>
 
+          <div>
+            <Label className="text-xs text-muted-foreground">Notes</Label>
+            <Textarea value={form.notes} onChange={e => update('notes', e.target.value)} placeholder="Serveur de production..." rows={2} className="bg-muted border-border font-mono text-sm" />
+          </div>
+
           <div className="flex gap-3 pt-2">
             <Button type="submit" className="flex-1 font-mono">
               {connection ? 'Mettre à jour' : 'Enregistrer'}
