@@ -138,11 +138,14 @@ export function GroupManager({
             </div>
           ) : (
             <button
+              {...dropProps(group.id)}
               onClick={() => onSelectGroup(group.id)}
               className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
-                selectedGroupId === group.id
-                  ? 'bg-muted text-primary terminal-glow border border-border'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                dragOverId === group.id
+                  ? 'bg-primary/20 text-primary border border-primary/50 terminal-glow'
+                  : selectedGroupId === group.id
+                    ? 'bg-muted text-primary terminal-glow border border-border'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
               }`}
             >
               <div className="flex items-center gap-2 min-w-0">
