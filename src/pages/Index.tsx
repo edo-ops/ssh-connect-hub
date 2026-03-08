@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { getConnections, saveConnection, deleteConnection, SSHConnection, getGroups, saveGroup, deleteGroup, SSHGroup } from '@/lib/ssh-store';
+import { getConnections, saveConnection, deleteConnection, SSHConnection, getGroups, saveGroup, deleteGroup, SSHGroup, setCryptoKey } from '@/lib/ssh-store';
 import { ConnectionCard } from '@/components/ConnectionCard';
 import { ConnectionForm } from '@/components/ConnectionForm';
 import { GroupManager } from '@/components/GroupManager';
 import { KeyManager } from '@/components/KeyManager';
 import { MasterPasswordPrompt } from '@/components/MasterPasswordPrompt';
 import { hasMasterPassword, getSession, initializeMasterPassword } from '@/lib/crypto';
-import { setCryptoKey } from '@/lib/ssh-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Terminal, Key, Server } from 'lucide-react';
